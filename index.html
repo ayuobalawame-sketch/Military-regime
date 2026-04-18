@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>نظام الخصم التطوعي - المبادرة العسكرية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tahoma', 'Cairo', sans-serif;
+        }
+
+        body {
+            background-image: url('logo.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* تحسين للأجهزة المحمولة */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px 12px;
+            }
+            .card {
+                padding: 18px 20px;
+            }
+            h2 {
+                font-size: 1.4rem;
+            }
+            h3 {
+                font-size: 1.2rem;
+            }
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+            .admin-tools {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .admin-tools .btn {
+                justify-content: center;
+            }
+            .status-badge {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            .modal-content {
+                padding: 20px 25px;
+                width: 95%;
+            }
+            .modal-content p {
+                font-size: 1.1rem;
+            }
+            .closed-full-message h2 {
+                font-size: 1.6rem;
+            }
+            .footer-design {
+                font-size: 0.75rem;
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-buttons {
+                flex-direction: column;
+            }
+            .nav-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            table, th, td {
+                font-size: 0.75rem;
+                padding: 8px 5px;
+            }
+            .action-icons i {
+                font-size: 1rem;
+            }
+        }
+
+        .card {
+            background: rgba(30, 40, 30, 0.65);
+            backdrop-filter: blur(3px);
+            border-radius: 28px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            border: 1px solid #e6b422;
+            transition: 0.3s;
+        }
+
+        h2, h3 {
+            color: #fff3e0;
+            text-shadow: 1px 1px 3px #00000050;
+            border-right: 5px solid #e6b422;
+            padding-right: 15px;
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            margin-bottom: 20px;
+        }
+        h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background: #2a6e3f;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1f552d;
+            transform: scale(1.02);
+        }
+        .btn-danger {
+            background: #b13e3e;
+            color: white;
+        }
+        .btn-warning {
+            background: #e6b422;
+            color: #2d2b1f;
+        }
+        .btn-outline {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #e6b422;
+            color: #fff3e0;
+        }
+        .btn-outline:hover {
+            background: #e6b422;
+            color: #2d2b1f;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #fff3e0;
+            text-shadow: 1px 1px 0 #000;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 16px;
+            border: 1px solid #e6b422;
+            font-size: 1rem;
+            background: rgba(255, 255, 240, 0.85);
+            color: #1f3b2c;
+            font-weight: bold;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ffd966;
+            background: rgba(255, 255, 240, 1);
+            box-shadow: 0 0 0 3px rgba(230, 180, 34, 0.3);
+        }
+
+        .status-badge {
+            background: rgba(0,0,0,0.6);
+            padding: 10px 15px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #e6b422;
+            border: 1px solid #e6b422;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 20px;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(2px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 245, 0.9);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        th {
+            background: #2a5a3b;
+            color: white;
+            padding: 14px 10px;
+            font-weight: bold;
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            color: #1f3b2c;
+            font-weight: 500;
+        }
+        tr:hover {
+            background: #faf3df;
+        }
+
+        .action-icons i {
+            margin: 0 5px;
+            cursor: pointer;
+            color: #b13e3e;
+            font-size: 1.2rem;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .admin-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .note {
+            font-size: 0.85rem;
+            color: #eef2e6;
+            text-shadow: 1px 1px 0 #000;
+            margin-top: 10px;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* رسالة الإغلاق الكاملة */
+        .closed-full-message {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .closed-full-message i {
+            font-size: 4rem;
+            color: #e6b422;
+            margin-bottom: 20px;
+        }
+        .closed-full-message h2 {
+            font-size: 2rem;
+            color: #fff3e0;
+            border: none;
+            margin-bottom: 15px;
+        }
+        .closed-full-message p {
+            font-size: 1.2rem;
+            color: #fff3e0;
+        }
+
+        /* نافذة منبثقة (مودال) لتسجيل الدخول */
+        .login-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .login-modal-content {
+            background: #fffef7;
+            border-radius: 32px;
+            padding: 30px 25px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            border: 2px solid #e6b422;
+            animation: fadeInUp 0.3s ease;
+        }
+        .login-modal-content i {
+            font-size: 2.5rem;
+            color: #2a6e3f;
+            margin-bottom: 15px;
+        }
+        .login-modal-content h3 {
+            color: #2a5a3b;
+            margin-bottom: 20px;
+            border: none;
+        }
+        .login-modal-content input {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 40px;
+            border: 1px solid #ccc;
+            text-align: right;
+        }
+        .login-modal-content button {
+            background: #2a6e3f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .login-error {
+            color: #b13e3e;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* نافذة النجاح */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fffef7;
+            border-radius: 32px;
+            padding: 30px 40px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            border: 2px solid #e6b422;
+            animation: fadeInUp 0.3s ease;
+        }
+        .modal-content i {
+            font-size: 3rem;
+            color: #2a6e3f;
+            margin-bottom: 15px;
+        }
+        .modal-content p {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2a5a3b;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+        .modal-content button {
+            background: #2a6e3f;
+            color: white;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .modal-content button:hover {
+            background: #1f552d;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* تذييل الصفحة (المصمم) */
+        .footer-design {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 40px;
+            color: #f0f0f0;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
+            border-top: 1px solid #e6b422;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .footer-design span {
+            margin: 0 10px;
+        }
+        .footer-design i {
+            margin-left: 5px;
+            color: #e6b422;
+        }
+
+        /* الطباعة */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0;
+                margin: 0;
+            }
+            body::before {
+                display: none;
+            }
+            .container {
+                margin: 0;
+                padding: 10px;
+            }
+            .no-print, .nav-buttons, .admin-tools, .footer-buttons, .btn, .action-icons, .modal, .login-modal, .status-badge, .note, .footer-design {
+                display: none !important;
+            }
+            .card {
+                background: white !important;
+                backdrop-filter: none !important;
+                box-shadow: none;
+                border: 1px solid #ccc;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            h2, h3 {
+                color: black !important;
+                text-shadow: none;
+                border-right-color: #2a5a3b;
+            }
+            .table-wrapper {
+                background: white;
+                backdrop-filter: none;
+                margin-top: 10px;
+            }
+            table {
+                background: white;
+                border: 1px solid #000;
+                width: 100%;
+            }
+            th {
+                background: #e0e0e0 !important;
+                color: black !important;
+                border: 1px solid #aaa;
+            }
+            td {
+                border: 1px solid #aaa;
+                color: black;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 1.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- أزرار التنقل -->
+    <div class="nav-buttons no-print">
+        <button id="userViewBtn" class="btn btn-outline"><i class="fas fa-user-shield"></i> الصفحة الرئيسية (مستخدم)</button>
+        <button id="adminLoginBtn" class="btn btn-primary"><i class="fas fa-lock"></i> لوحة المدير</button>
+    </div>
+
+    <!-- قسم المستخدم -->
+    <div id="userSection" class="card">
+        <div id="userNormalContent">
+            <div class="flex-between" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <h2><i class="fas fa-hand-holding-heart"></i> المشاركة في الخصم التطوعي</h2>
+                <div class="status-badge" id="systemStatusBadgeUser">🟢 النظام مفتوح</div>
+            </div>
+            <p style="margin-bottom: 20px; color: #fff3e0; text-shadow: 1px 1px 0 #000;">تبرع شهرياً بالمبلغ الذي تراه مناسباً، يتم خصمه شهرياً بإرادتك.</p>
+            <form id="donationForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> الاسم الكامل</label>
+                    <input type="text" id="fullName" placeholder="مثال: خالد بن محمد العتيبي" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> رقم العسكري</label>
+                    <input type="text" id="milNumber" placeholder="مثال: 2024001" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-star-of-life"></i> الرتبة</label>
+                    <input type="text" id="rank" placeholder="مثال: رائد / نقيب / جندي أول" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-coins"></i> قيمة الخصم (ريال / دينار)</label>
+                    <input type="number" id="amount" placeholder="المبلغ الذي ترغب بالتبرع به" min="1" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> الشهر</label>
+                    <input type="month" id="month" required>
+                </div>
+                <button type="submit" id="submitDonationBtn" class="btn btn-primary"><i class="fas fa-check-circle"></i> تقديم المساهمة</button>
+            </form>
+            <div class="note"><i class="fas fa-info-circle"></i> سيتم تسجيل بياناتك ويمكن للمدير مراجعتها.</div>
+        </div>
+        <div id="systemClosedFullMessage" class="closed-full-message" style="display: none;">
+            <i class="fas fa-ban"></i>
+            <h2>المنظومة غير متاحة حالياً</h2>
+            <p>يرجى مراجعة المسؤول لمعرفة موعد فتح النظام.</p>
+        </div>
+    </div>
+
+    <!-- قسم المدير -->
+    <div id="adminSection" class="card" style="display: none;">
+        <div class="flex-between" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h2><i class="fas fa-chalkboard-user"></i> لوحة القيادة - المدير</h2>
+            <button id="logoutAdminBtn" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> خروج من المدير</button>
+        </div>
+        <div class="admin-tools">
+            <div class="status-badge" id="systemStatusBadgeAdmin">🟢 النظام مفتوح</div>
+            <button id="toggleSystemBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> إغلاق / فتح النظام</button>
+            <button id="exportPdfBtn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+            <button id="printTableBtn" class="btn btn-outline"><i class="fas fa-print"></i> طباعة الجدول</button>
+            <button id="clearAllDataBtn" class="btn btn-danger"><i class="fas fa-trash-alt"></i> مسح كل البيانات</button>
+        </div>
+        <h3><i class="fas fa-users"></i> قائمة المشاركين (الخصومات الشهرية)</h3>
+        <div class="table-wrapper">
+            <table id="adminTable">
+                <thead>
+                    <tr><th>الاسم</th><th>رقم العسكري</th><th>الرتبة</th><th>قيمة الخصم</th><th>الشهر</th><th class="no-print">إجراء</th></tr>
+                </thead>
+                <tbody id="adminTableBody"><tr><td colspan="6" style="text-align:center;">لا توجد بيانات بعد</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer-buttons no-print"><span class="note"><i class="fas fa-database"></i> يمكنك سحب الجدول (PDF) أو طباعته، وحذف أي سجل.</span></div>
+    </div>
+
+    <!-- تذييل المصمم -->
+    <div class="footer-design no-print">
+        <span><i class="fas fa-code"></i> المصمم: أيوب محمد العوامي</span>
+        <span><i class="fas fa-phone-alt"></i> للتواصل: 0924221925</span>
+    </div>
+</div>
+
+<!-- نافذة تسجيل الدخول (مودال) -->
+<div id="loginModal" class="login-modal">
+    <div class="login-modal-content">
+        <i class="fas fa-user-lock"></i>
+        <h3>تسجيل الدخول للمدير</h3>
+        <input type="text" id="loginName" placeholder="الاسم" autocomplete="off">
+        <input type="password" id="loginPassword" placeholder="كلمة المرور">
+        <button id="submitLoginBtn">دخول</button>
+        <div id="loginErrorMsg" class="login-error"></div>
+    </div>
+</div>
+
+<!-- نافذة نجاح العملية -->
+<div id="successModal" class="modal">
+    <div class="modal-content">
+        <i class="fas fa-check-circle"></i>
+        <p>تمت العملية بنجاح - بارك الله فيك،<br>في ميزان حسناتك إن شاء الله</p>
+        <button onclick="closeModal()">حسناً</button>
+    </div>
+</div>
+
+<script>
+    const STORAGE_ENTRIES = "military_donations";
+    const STORAGE_SYSTEM = "system_closed_status";
+    let entries = [];
+    let isAdminLoggedIn = false;
+
+    // عناصر DOM
+    const userSection = document.getElementById('userSection');
+    const adminSection = document.getElementById('adminSection');
+    const adminTableBody = document.getElementById('adminTableBody');
+    const systemStatusBadgeUser = document.getElementById('systemStatusBadgeUser');
+    const systemStatusBadgeAdmin = document.getElementById('systemStatusBadgeAdmin');
+    const donationForm = document.getElementById('donationForm');
+    const successModal = document.getElementById('successModal');
+    const userNormalContent = document.getElementById('userNormalContent');
+    const systemClosedFullMessage = document.getElementById('systemClosedFullMessage');
+    const loginModal = document.getElementById('loginModal');
+    const loginNameInput = document.getElementById('loginName');
+    const loginPasswordInput = document.getElementById('loginPassword');
+    const submitLoginBtn = document.getElementById('submitLoginBtn');
+    const loginErrorMsg = document.getElementById('loginErrorMsg');
+
+    // بيانات الاعتماد المطلوبة
+    const ADMIN_USERNAME = "اسلام مصطفى ابعيو";
+    const ADMIN_PASSWORD = "092123";
+
+    function closeModal() { successModal.style.display = "none"; }
+    function showSuccessModal() { successModal.style.display = "flex"; }
+
+    function closeLoginModal() { loginModal.style.display = "none"; }
+    function showLoginModal() { loginModal.style.display = "flex"; loginErrorMsg.innerText = ""; loginNameInput.value = ""; loginPasswordInput.value = ""; }
+
+    function loadEntries() {
+        const stored = localStorage.getItem(STORAGE_ENTRIES);
+        if (stored) entries = JSON.parse(stored);
+        else {
+            const sampleMonth = new Date().toISOString().slice(0,7);
+            entries = [
+                { id: 1001, name: "أحمد بن سعيد الراشدي", militaryNumber: "20231001", rank: "رائد", amount: 150, month: sampleMonth, timestamp: Date.now() - 86400000 },
+                { id: 1002, name: "فهد محمد الغامدي", militaryNumber: "20231205", rank: "نقيب", amount: 200, month: sampleMonth, timestamp: Date.now() - 172800000 },
+                { id: 1003, name: "سعد عبدالله الحربي", militaryNumber: "20240512", rank: "جندي أول", amount: 75, month: sampleMonth, timestamp: Date.now() - 259200000 }
+            ];
+            saveEntries();
+        }
+    }
+    function saveEntries() { localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(entries)); }
+    function getSystemClosed() { return localStorage.getItem(STORAGE_SYSTEM) === 'true'; }
+    function setSystemClosed(closed) { localStorage.setItem(STORAGE_SYSTEM, closed.toString()); updateSystemUI(); }
+    
+    function updateSystemUI() {
+        const isClosed = getSystemClosed();
+        systemStatusBadgeUser.innerHTML = isClosed ? "🔴 النظام مغلق" : "🟢 النظام مفتوح";
+        systemStatusBadgeAdmin.innerHTML = isClosed ? "🔴 النظام مغلق" : "🟢 النظام مفتوح";
+        systemStatusBadgeUser.style.background = isClosed ? "#f8d7da" : "rgba(0,0,0,0.6)";
+        systemStatusBadgeAdmin.style.background = isClosed ? "#f8d7da" : "rgba(0,0,0,0.6)";
+        
+        if (isClosed) {
+            userNormalContent.style.display = "none";
+            systemClosedFullMessage.style.display = "block";
+        } else {
+            userNormalContent.style.display = "block";
+            systemClosedFullMessage.style.display = "none";
+        }
+        
+        const submitBtn = document.getElementById('submitDonationBtn');
+        if (submitBtn) submitBtn.disabled = isClosed;
+        const inputs = donationForm.querySelectorAll('input');
+        inputs.forEach(inp => { if(inp.type !== 'button') inp.disabled = isClosed; });
+        if(submitBtn) submitBtn.disabled = isClosed;
+    }
+
+    function formatMonth(monthValue) {
+        if (!monthValue) return "";
+        const [year, month] = monthValue.split('-');
+        const names = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+        return `${names[parseInt(month,10)-1]} ${year}`;
+    }
+
+    function renderAdminTable() {
+        if (!adminTableBody) return;
+        if (!entries.length) { adminTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">📭 لا توجد مساهمات</td></tr>'; return; }
+        const sorted = [...entries].sort((a,b)=>b.timestamp - a.timestamp);
+        let html = '';
+        sorted.forEach(e => {
+            html += `<tr>
+                        <td>${escapeHtml(e.name)}</td>
+                        <td>${escapeHtml(e.militaryNumber)}</td>
+                        <td>${escapeHtml(e.rank)}</td>
+                        <td>${Number(e.amount).toLocaleString()}</td>
+                        <td>${formatMonth(e.month)}</td>
+                        <td class="action-icons no-print"><i class="fas fa-trash-alt" onclick="deleteEntry(${e.id})" title="حذف"></i></td>
+                     </tr>`;
+        });
+        adminTableBody.innerHTML = html;
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
+    window.deleteEntry = function(id) {
+        if(confirm("حذف السجل نهائياً؟")) { entries = entries.filter(e=>e.id!==id); saveEntries(); renderAdminTable(); }
+    };
+
+    function addDonation(name, militaryNumber, rank, amount, month) {
+        const newEntry = { id: Date.now(), name: name.trim(), militaryNumber: militaryNumber.trim(), rank: rank.trim(), amount: Number(amount), month: month, timestamp: Date.now() };
+        entries.push(newEntry);
+        saveEntries();
+        renderAdminTable();
+        return true;
+    }
+
+    function handleUserSubmit(e) {
+        e.preventDefault();
+        if (getSystemClosed()) { alert("⚠️ المنظومة مغلقة حالياً، لا يمكن تقديم طلبات جديدة."); return; }
+        const name = document.getElementById('fullName').value;
+        const milNumber = document.getElementById('milNumber').value;
+        const rank = document.getElementById('rank').value;
+        const amount = document.getElementById('amount').value;
+        const month = document.getElementById('month').value;
+        if (!name || !milNumber || !rank || !amount || !month) { alert("جميع الحقول مطلوبة"); return; }
+        if (amount <= 0) { alert("قيمة الخصم يجب أن تكون أكبر من صفر"); return; }
+        addDonation(name, milNumber, rank, amount, month);
+        showSuccessModal();
+        donationForm.reset();
+        const today = new Date();
+        document.getElementById('month').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    }
+
+    function exportToPDF() {
+        if(!entries.length){ alert("لا توجد بيانات"); return; }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        doc.setFontSize(18); doc.text("تقرير المشاركين - المبادرة العسكرية", 14, 15);
+        doc.setFontSize(11); doc.text(`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`, 14, 25);
+        const tableData = entries.map(e => [e.name, e.militaryNumber, e.rank, e.amount.toString(), formatMonth(e.month)]);
+        doc.autoTable({ head: [['الاسم', 'رقم العسكري', 'الرتبة', 'قيمة الخصم', 'الشهر']], body: tableData, startY: 32, theme: 'striped', headStyles: { fillColor: [42, 94, 59], textColor: 255, halign: 'center' }, styles: { halign: 'center', fontSize: 10 } });
+        doc.save("تقرير_الخصومات.pdf");
+    }
+
+    function printAdminTable() { window.print(); }
+    function clearAllData() { if(confirm("مسح كل البيانات نهائياً؟")){ entries=[]; saveEntries(); renderAdminTable(); alert("تم مسح جميع السجلات"); } }
+    function toggleSystem() { setSystemClosed(!getSystemClosed()); alert(`تم ${getSystemClosed()?"إغلاق":"فتح"} النظام.`); updateSystemUI(); }
+
+    // تسجيل الدخول عبر المودال
+    function attemptLogin() {
+        const enteredName = loginNameInput.value.trim();
+        const enteredPass = loginPasswordInput.value.trim();
+        if (enteredName === ADMIN_USERNAME && enteredPass === ADMIN_PASSWORD) {
+            isAdminLoggedIn = true;
+            closeLoginModal();
+            showAdminDashboard();
+        } else {
+            loginErrorMsg.innerText = "البيانات غير صحيحة";
+        }
+    }
+
+    function showAdminDashboard() { 
+        userSection.style.display = "none"; 
+        adminSection.style.display = "block"; 
+        renderAdminTable(); 
+        updateSystemUI(); 
+    }
+    
+    function logoutAdmin() { 
+        isAdminLoggedIn = false; 
+        userSection.style.display = "block"; 
+        adminSection.style.display = "none"; 
+        updateSystemUI(); 
+    }
+
+    function checkInitialView() {
+        if(isAdminLoggedIn) showAdminDashboard();
+        else { userSection.style.display = "block"; adminSection.style.display = "none"; }
+        updateSystemUI();
+        const today = new Date();
+        const defaultMonth = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+        const monthInput = document.getElementById('month');
+        if(monthInput && !monthInput.value) monthInput.value = defaultMonth;
+    }
+
+    // أحداث
+    document.getElementById('userViewBtn').addEventListener('click', ()=>{ if(isAdminLoggedIn) logoutAdmin(); else { userSection.style.display="block"; adminSection.style.display="none"; updateSystemUI(); } });
+    document.getElementById('adminLoginBtn').addEventListener('click', (e) => {
+        if(isAdminLoggedIn) {
+            showAdminDashboard();
+        } else {
+            showLoginModal();
+        }
+    });
+    document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
+    donationForm.addEventListener('submit', handleUserSubmit);
+    document.getElementById('toggleSystemBtn').addEventListener('click', toggleSystem);
+    document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+    document.getElementById('printTableBtn').addEventListener('click', printAdminTable);
+    document.getElementById('clearAllDataBtn').addEventListener('click', clearAllData);
+    submitLoginBtn.addEventListener('click', attemptLogin);
+    // إغلاق المودال عند الضغط خارجها
+    window.onclick = function(event) {
+        if (event.target === loginModal) closeLoginModal();
+        if (event.target === successModal) closeModal();
+    }
+
+    loadEntries();
+    if(localStorage.getItem(STORAGE_SYSTEM) === null) setSystemClosed(false);
+    checkInitialView();
+    if(adminSection.style.display === 'block') renderAdminTable();
+</script>
+</body>
+</html>
