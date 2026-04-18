@@ -20,9 +20,9 @@
             background-repeat: no-repeat;
             background-position: center center;
             background-attachment: fixed;
-            background-size: cover;
+            background-size: auto 75%; /* أصبح أكبر قليلاً (75% بدلاً من 60%) */
             min-height: 100vh;
-            padding: 20px 15px;
+            padding: 35px 30px;
         }
 
         body::before {
@@ -32,7 +32,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: rgba(0, 0, 0, 0.6);
             z-index: 0;
         }
 
@@ -43,10 +43,13 @@
             z-index: 1;
         }
 
-        /* تحسين للأجهزة المحمولة */
         @media (max-width: 768px) {
             body {
-                padding: 15px 12px;
+                padding: 20px 15px;
+                background-size: auto 55%; /* أكبر قليلاً على المحمول أيضاً */
+            }
+            body::before {
+                background-color: rgba(0, 0, 0, 0.7);
             }
             .card {
                 padding: 18px 20px;
@@ -107,10 +110,10 @@
         }
 
         .card {
-            background: rgba(30, 40, 30, 0.65);
-            backdrop-filter: blur(3px);
+            background: rgba(30, 40, 30, 0.75);
+            backdrop-filter: blur(4px);
             border-radius: 28px;
-            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4);
             padding: 25px 30px;
             margin-bottom: 25px;
             border: 1px solid #e6b422;
@@ -119,7 +122,7 @@
 
         h2, h3 {
             color: #fff3e0;
-            text-shadow: 1px 1px 3px #00000050;
+            text-shadow: 1px 1px 3px #00000080;
             border-right: 5px solid #e6b422;
             padding-right: 15px;
         }
@@ -191,7 +194,7 @@
             border-radius: 16px;
             border: 1px solid #e6b422;
             font-size: 1rem;
-            background: rgba(255, 255, 240, 0.85);
+            background: rgba(255, 255, 240, 0.9);
             color: #1f3b2c;
             font-weight: bold;
         }
@@ -217,13 +220,13 @@
             overflow-x: auto;
             border-radius: 20px;
             margin-top: 20px;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.3);
             backdrop-filter: blur(2px);
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            background: rgba(255, 255, 245, 0.9);
+            background: rgba(255, 255, 245, 0.95);
             border-radius: 20px;
             overflow: hidden;
         }
@@ -687,7 +690,7 @@
                         <td>${Number(e.amount).toLocaleString()}</td>
                         <td>${formatMonth(e.month)}</td>
                         <td class="action-icons no-print"><i class="fas fa-trash-alt" onclick="deleteEntry(${e.id})" title="حذف"></i></td>
-                     </tr>`;
+                      </tr>`;
         });
         adminTableBody.innerHTML = html;
     }
