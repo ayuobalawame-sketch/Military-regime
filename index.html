@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>نظام الخصم التطوعي - المبادرة العسكرية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- إضافة html2canvas لتحويل الجدول إلى صورة وحل مشكلة العربية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Tahoma', 'Cairo', sans-serif;
+            font-family: 'Cairo', 'Segoe UI', 'Tahoma', sans-serif;
         }
 
         body {
@@ -20,7 +22,7 @@
             background-repeat: no-repeat;
             background-position: center center;
             background-attachment: fixed;
-            background-size: auto 75%; /* أصبح أكبر قليلاً (75% بدلاً من 60%) */
+            background-size: auto 75%;
             min-height: 100vh;
             padding: 35px 30px;
         }
@@ -43,10 +45,14 @@
             z-index: 1;
         }
 
+        .print-logo {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 20px 15px;
-                background-size: auto 55%; /* أكبر قليلاً على المحمول أيضاً */
+                background-size: auto 55%;
             }
             body::before {
                 background-color: rgba(0, 0, 0, 0.7);
@@ -54,59 +60,23 @@
             .card {
                 padding: 18px 20px;
             }
-            h2 {
-                font-size: 1.4rem;
-            }
-            h3 {
-                font-size: 1.2rem;
-            }
-            .btn {
-                padding: 8px 16px;
-                font-size: 0.85rem;
-            }
-            .admin-tools {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .admin-tools .btn {
-                justify-content: center;
-            }
-            .status-badge {
-                font-size: 0.8rem;
-                padding: 6px 12px;
-            }
-            .modal-content {
-                padding: 20px 25px;
-                width: 95%;
-            }
-            .modal-content p {
-                font-size: 1.1rem;
-            }
-            .closed-full-message h2 {
-                font-size: 1.6rem;
-            }
-            .footer-design {
-                font-size: 0.75rem;
-                flex-direction: column;
-                gap: 8px;
-            }
+            h2 { font-size: 1.4rem; }
+            h3 { font-size: 1.2rem; }
+            .btn { padding: 8px 16px; font-size: 0.85rem; }
+            .admin-tools { flex-direction: column; align-items: stretch; }
+            .admin-tools .btn { justify-content: center; }
+            .status-badge { font-size: 0.8rem; padding: 6px 12px; }
+            .modal-content { padding: 20px 25px; width: 95%; }
+            .modal-content p { font-size: 1.1rem; }
+            .closed-full-message h2 { font-size: 1.6rem; }
+            .footer-design { font-size: 0.75rem; flex-direction: column; gap: 8px; }
         }
 
         @media (max-width: 480px) {
-            .nav-buttons {
-                flex-direction: column;
-            }
-            .nav-buttons .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            table, th, td {
-                font-size: 0.75rem;
-                padding: 8px 5px;
-            }
-            .action-icons i {
-                font-size: 1rem;
-            }
+            .nav-buttons { flex-direction: column; }
+            .nav-buttons .btn { width: 100%; justify-content: center; }
+            table, th, td { font-size: 0.75rem; padding: 8px 5px; }
+            .action-icons i { font-size: 1rem; }
         }
 
         .card {
@@ -126,15 +96,8 @@
             border-right: 5px solid #e6b422;
             padding-right: 15px;
         }
-
-        h2 {
-            font-size: 1.7rem;
-            margin-bottom: 20px;
-        }
-        h3 {
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-        }
+        h2 { font-size: 1.7rem; margin-bottom: 20px; }
+        h3 { font-size: 1.3rem; margin-bottom: 15px; }
 
         .btn {
             display: inline-flex;
@@ -148,39 +111,15 @@
             transition: 0.2s;
             font-size: 0.9rem;
         }
-        .btn-primary {
-            background: #2a6e3f;
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #1f552d;
-            transform: scale(1.02);
-        }
-        .btn-danger {
-            background: #b13e3e;
-            color: white;
-        }
-        .btn-warning {
-            background: #e6b422;
-            color: #2d2b1f;
-        }
-        .btn-outline {
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #e6b422;
-            color: #fff3e0;
-        }
-        .btn-outline:hover {
-            background: #e6b422;
-            color: #2d2b1f;
-        }
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.8rem;
-        }
+        .btn-primary { background: #2a6e3f; color: white; }
+        .btn-primary:hover { background: #1f552d; transform: scale(1.02); }
+        .btn-danger { background: #b13e3e; color: white; }
+        .btn-warning { background: #e6b422; color: #2d2b1f; }
+        .btn-outline { background: rgba(0,0,0,0.5); border: 2px solid #e6b422; color: #fff3e0; }
+        .btn-outline:hover { background: #e6b422; color: #2d2b1f; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 20px; }
         label {
             font-weight: 600;
             display: block;
@@ -243,9 +182,7 @@
             color: #1f3b2c;
             font-weight: 500;
         }
-        tr:hover {
-            background: #faf3df;
-        }
+        tr:hover { background: #faf3df; }
 
         .action-icons i {
             margin: 0 5px;
@@ -284,7 +221,6 @@
             cursor: not-allowed;
         }
 
-        /* رسالة الإغلاق الكاملة */
         .closed-full-message {
             text-align: center;
             padding: 50px 20px;
@@ -305,7 +241,6 @@
             color: #fff3e0;
         }
 
-        /* نافذة منبثقة (مودال) لتسجيل الدخول */
         .login-modal {
             display: none;
             position: fixed;
@@ -363,7 +298,6 @@
             font-size: 0.9rem;
         }
 
-        /* نافذة النجاح */
         .modal {
             display: none;
             position: fixed;
@@ -417,7 +351,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* تذييل الصفحة (المصمم) */
         .footer-design {
             text-align: center;
             margin-top: 30px;
@@ -441,71 +374,76 @@
             color: #e6b422;
         }
 
-        /* الطباعة */
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 1.5cm;
+            }
             body {
-                background: white !important;
-                padding: 0;
-                margin: 0;
+                background-image: url('logo.png') !important;
+                background-repeat: no-repeat !important;
+                background-position: center center !important;
+                background-attachment: scroll !important;
+                background-size: auto 90% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                direction: rtl !important;
             }
-            body::before {
-                display: none;
+            * {
+                font-family: 'Traditional Arabic', 'Simplified Arabic', 'Cairo', 'Arial', sans-serif !important;
+                direction: rtl !important;
             }
+            .print-logo {
+                display: block;
+                position: absolute;
+                top: 20px;
+                z-index: 2;
+                max-height: 80px;
+                width: auto;
+                opacity: 0.9;
+            }
+            .print-logo-left { left: 20px; right: auto; }
+            .print-logo-right { right: 20px; left: auto; }
+            .print-logo-center { left: 50%; transform: translateX(-50%); top: 20px; }
             .container {
+                position: relative;
+                z-index: 1;
+                background: transparent;
+                padding: 100px 20px 20px 20px;
                 margin: 0;
-                padding: 10px;
             }
             .no-print, .nav-buttons, .admin-tools, .footer-buttons, .btn, .action-icons, .modal, .login-modal, .status-badge, .note, .footer-design {
                 display: none !important;
             }
             .card {
-                background: white !important;
+                background: rgba(255, 255, 255, 0.95) !important;
                 backdrop-filter: none !important;
                 box-shadow: none;
-                border: 1px solid #ccc;
+                border: 1px solid #aaa;
                 padding: 15px;
                 margin-bottom: 20px;
             }
-            h2, h3 {
-                color: black !important;
-                text-shadow: none;
-                border-right-color: #2a5a3b;
-            }
-            .table-wrapper {
-                background: white;
-                backdrop-filter: none;
-                margin-top: 10px;
-            }
-            table {
-                background: white;
-                border: 1px solid #000;
-                width: 100%;
-            }
-            th {
-                background: #e0e0e0 !important;
-                color: black !important;
-                border: 1px solid #aaa;
-            }
-            td {
-                border: 1px solid #aaa;
-                color: black;
-            }
-            @page {
-                size: A4 landscape;
-                margin: 1.5cm;
-            }
+            h2, h3 { color: #1f3b2c !important; text-shadow: none !important; border-right-color: #2a5a3b; }
+            .table-wrapper { background: transparent !important; backdrop-filter: none !important; }
+            table { background: white !important; border: 1px solid #000; width: 100%; }
+            th { background: #e0e0e0 !important; color: black !important; border: 1px solid #aaa; }
+            td { border: 1px solid #aaa; color: black; background: white; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- أزرار التنقل -->
+    <img src="logo2.png" class="print-logo print-logo-left" alt="شعار يسار">
+    <img src="logo3.png" class="print-logo print-logo-right" alt="شعار يمين">
+    <img src="logo.png" class="print-logo print-logo-center" alt="شعار وسط">
+
     <div class="nav-buttons no-print">
         <button id="userViewBtn" class="btn btn-outline"><i class="fas fa-user-shield"></i> الصفحة الرئيسية (مستخدم)</button>
         <button id="adminLoginBtn" class="btn btn-primary"><i class="fas fa-lock"></i> لوحة المدير</button>
     </div>
 
-    <!-- قسم المستخدم -->
     <div id="userSection" class="card">
         <div id="userNormalContent">
             <div class="flex-between" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
@@ -545,7 +483,6 @@
         </div>
     </div>
 
-    <!-- قسم المدير -->
     <div id="adminSection" class="card" style="display: none;">
         <div class="flex-between" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <h2><i class="fas fa-chalkboard-user"></i> لوحة القيادة - المدير</h2>
@@ -559,7 +496,7 @@
             <button id="clearAllDataBtn" class="btn btn-danger"><i class="fas fa-trash-alt"></i> مسح كل البيانات</button>
         </div>
         <h3><i class="fas fa-users"></i> قائمة المشاركين (الخصومات الشهرية)</h3>
-        <div class="table-wrapper">
+        <div class="table-wrapper" id="pdfExportArea">
             <table id="adminTable">
                 <thead>
                     <tr><th>الاسم</th><th>رقم العسكري</th><th>الرتبة</th><th>قيمة الخصم</th><th>الشهر</th><th class="no-print">إجراء</th></tr>
@@ -571,14 +508,12 @@
         <div class="footer-buttons no-print"><span class="note"><i class="fas fa-database"></i> يمكنك سحب الجدول (PDF) أو طباعته، وحذف أي سجل.</span></div>
     </div>
 
-    <!-- تذييل المصمم -->
     <div class="footer-design no-print">
         <span><i class="fas fa-code"></i> المصمم: أيوب محمد العوامي</span>
         <span><i class="fas fa-phone-alt"></i> للتواصل: 0924221925</span>
     </div>
 </div>
 
-<!-- نافذة تسجيل الدخول (مودال) -->
 <div id="loginModal" class="login-modal">
     <div class="login-modal-content">
         <i class="fas fa-user-lock"></i>
@@ -590,7 +525,6 @@
     </div>
 </div>
 
-<!-- نافذة نجاح العملية -->
 <div id="successModal" class="modal">
     <div class="modal-content">
         <i class="fas fa-check-circle"></i>
@@ -600,12 +534,12 @@
 </div>
 
 <script>
+    // جميع المتغيرات والدوال الأساسية (نفس السابق)
     const STORAGE_ENTRIES = "military_donations";
     const STORAGE_SYSTEM = "system_closed_status";
     let entries = [];
     let isAdminLoggedIn = false;
 
-    // عناصر DOM
     const userSection = document.getElementById('userSection');
     const adminSection = document.getElementById('adminSection');
     const adminTableBody = document.getElementById('adminTableBody');
@@ -621,13 +555,11 @@
     const submitLoginBtn = document.getElementById('submitLoginBtn');
     const loginErrorMsg = document.getElementById('loginErrorMsg');
 
-    // بيانات الاعتماد المطلوبة
     const ADMIN_USERNAME = "اسلام مصطفى ابعيو";
     const ADMIN_PASSWORD = "092123";
 
     function closeModal() { successModal.style.display = "none"; }
     function showSuccessModal() { successModal.style.display = "flex"; }
-
     function closeLoginModal() { loginModal.style.display = "none"; }
     function showLoginModal() { loginModal.style.display = "flex"; loginErrorMsg.innerText = ""; loginNameInput.value = ""; loginPasswordInput.value = ""; }
 
@@ -654,7 +586,6 @@
         systemStatusBadgeAdmin.innerHTML = isClosed ? "🔴 النظام مغلق" : "🟢 النظام مفتوح";
         systemStatusBadgeUser.style.background = isClosed ? "#f8d7da" : "rgba(0,0,0,0.6)";
         systemStatusBadgeAdmin.style.background = isClosed ? "#f8d7da" : "rgba(0,0,0,0.6)";
-        
         if (isClosed) {
             userNormalContent.style.display = "none";
             systemClosedFullMessage.style.display = "block";
@@ -662,7 +593,6 @@
             userNormalContent.style.display = "block";
             systemClosedFullMessage.style.display = "none";
         }
-        
         const submitBtn = document.getElementById('submitDonationBtn');
         if (submitBtn) submitBtn.disabled = isClosed;
         const inputs = donationForm.querySelectorAll('input');
@@ -725,22 +655,53 @@
         document.getElementById('month').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
     }
 
+    // دالة تصدير PDF باستخدام html2canvas لحل مشكلة العربية بشكل نهائي
     function exportToPDF() {
-        if(!entries.length){ alert("لا توجد بيانات"); return; }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-        doc.setFontSize(18); doc.text("تقرير المشاركين - المبادرة العسكرية", 14, 15);
-        doc.setFontSize(11); doc.text(`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`, 14, 25);
-        const tableData = entries.map(e => [e.name, e.militaryNumber, e.rank, e.amount.toString(), formatMonth(e.month)]);
-        doc.autoTable({ head: [['الاسم', 'رقم العسكري', 'الرتبة', 'قيمة الخصم', 'الشهر']], body: tableData, startY: 32, theme: 'striped', headStyles: { fillColor: [42, 94, 59], textColor: 255, halign: 'center' }, styles: { halign: 'center', fontSize: 10 } });
-        doc.save("تقرير_الخصومات.pdf");
+        if(!entries.length){ alert("لا توجد بيانات لتصديرها"); return; }
+        
+        const element = document.getElementById('pdfExportArea');
+        // إخفاء عمود الإجراءات مؤقتاً لعدم ظهوره في PDF
+        const actionCells = document.querySelectorAll('#adminTable .action-icons');
+        actionCells.forEach(cell => cell.style.display = 'none');
+        
+        html2canvas(element, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const imgWidth = 190; // عرض A4 بالملليمتر
+            const pageHeight = 277;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 10;
+            
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+            doc.save('تقرير_الخصومات.pdf');
+            // إعادة إظهار عمود الإجراءات
+            actionCells.forEach(cell => cell.style.display = 'table-cell');
+        }).catch(error => {
+            console.error('خطأ في إنشاء PDF:', error);
+            alert('حدث خطأ أثناء تصدير PDF، يرجى المحاولة مرة أخرى أو استخدام زر الطباعة.');
+            actionCells.forEach(cell => cell.style.display = 'table-cell');
+        });
     }
 
     function printAdminTable() { window.print(); }
     function clearAllData() { if(confirm("مسح كل البيانات نهائياً؟")){ entries=[]; saveEntries(); renderAdminTable(); alert("تم مسح جميع السجلات"); } }
     function toggleSystem() { setSystemClosed(!getSystemClosed()); alert(`تم ${getSystemClosed()?"إغلاق":"فتح"} النظام.`); updateSystemUI(); }
 
-    // تسجيل الدخول عبر المودال
     function attemptLogin() {
         const enteredName = loginNameInput.value.trim();
         const enteredPass = loginPasswordInput.value.trim();
@@ -777,15 +738,8 @@
         if(monthInput && !monthInput.value) monthInput.value = defaultMonth;
     }
 
-    // أحداث
     document.getElementById('userViewBtn').addEventListener('click', ()=>{ if(isAdminLoggedIn) logoutAdmin(); else { userSection.style.display="block"; adminSection.style.display="none"; updateSystemUI(); } });
-    document.getElementById('adminLoginBtn').addEventListener('click', (e) => {
-        if(isAdminLoggedIn) {
-            showAdminDashboard();
-        } else {
-            showLoginModal();
-        }
-    });
+    document.getElementById('adminLoginBtn').addEventListener('click', (e) => { if(isAdminLoggedIn) { showAdminDashboard(); } else { showLoginModal(); } });
     document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
     donationForm.addEventListener('submit', handleUserSubmit);
     document.getElementById('toggleSystemBtn').addEventListener('click', toggleSystem);
@@ -793,7 +747,6 @@
     document.getElementById('printTableBtn').addEventListener('click', printAdminTable);
     document.getElementById('clearAllDataBtn').addEventListener('click', clearAllData);
     submitLoginBtn.addEventListener('click', attemptLogin);
-    // إغلاق المودال عند الضغط خارجها
     window.onclick = function(event) {
         if (event.target === loginModal) closeLoginModal();
         if (event.target === successModal) closeModal();
