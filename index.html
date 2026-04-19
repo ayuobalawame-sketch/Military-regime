@@ -6,7 +6,6 @@
     <title>نظام الخصم التطوعي - المبادرة العسكرية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- إضافة html2canvas لتحويل الجدول إلى صورة وحل مشكلة العربية -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -45,21 +44,55 @@
             z-index: 1;
         }
 
+        /* الصور الثلاث تظهر فقط في الطباعة */
         .print-logo {
             display: none;
         }
 
+        /* منطقة التصدير (مخفية) تستخدم فقط للجدول بدون صور */
+        .export-area {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 1000px;
+            background: white;
+            padding: 30px;
+            direction: rtl;
+            font-family: 'Cairo', 'Traditional Arabic', sans-serif;
+        }
+        .export-area .report-date {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #1f3b2c;
+        }
+        .export-area table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            border: 1px solid #000;
+            font-size: 14px;
+        }
+        .export-area th {
+            background-color: #d0d8c8 !important; /* تظليل خفيف للهيدر في PDF */
+            color: #1f3b2c;
+            padding: 12px 8px;
+            border: 1px solid #000;
+            font-weight: bold;
+        }
+        .export-area td {
+            padding: 10px 8px;
+            border: 1px solid #000;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
-            body {
-                padding: 20px 15px;
-                background-size: auto 55%;
-            }
-            body::before {
-                background-color: rgba(0, 0, 0, 0.7);
-            }
-            .card {
-                padding: 18px 20px;
-            }
+            body { padding: 20px 15px; background-size: auto 55%; }
+            body::before { background-color: rgba(0, 0, 0, 0.7); }
+            .card { padding: 18px 20px; }
             h2 { font-size: 1.4rem; }
             h3 { font-size: 1.2rem; }
             .btn { padding: 8px 16px; font-size: 0.85rem; }
@@ -169,8 +202,9 @@
             border-radius: 20px;
             overflow: hidden;
         }
+        /* تظليل خفيف لرأس الجدول في الشاشة العادية */
         th {
-            background: #2a5a3b;
+            background: #5a7c5a !important;
             color: white;
             padding: 14px 10px;
             font-weight: bold;
@@ -374,70 +408,39 @@
             color: #e6b422;
         }
 
+        /* تنسيق الطباعة العادية: تظهر الصور الثلاث + تظليل خفيف للهيدر */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 1.5cm;
-            }
-            body {
-                background-image: url('logo.png') !important;
-                background-repeat: no-repeat !important;
-                background-position: center center !important;
-                background-attachment: scroll !important;
-                background-size: auto 90% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                direction: rtl !important;
-            }
-            * {
-                font-family: 'Traditional Arabic', 'Simplified Arabic', 'Cairo', 'Arial', sans-serif !important;
-                direction: rtl !important;
-            }
-            .print-logo {
-                display: block;
-                position: absolute;
-                top: 20px;
-                z-index: 2;
-                max-height: 80px;
-                width: auto;
-                opacity: 0.9;
-            }
+            @page { size: A4 portrait; margin: 1.5cm; }
+            body { background-image: none !important; background-color: white !important; padding: 0 !important; margin: 0 !important; }
+            body::before, body::after { display: none !important; }
+            * { font-family: 'Cairo', 'Traditional Arabic', 'Arial', sans-serif !important; direction: rtl !important; }
+            
+            /* إظهار الصور الثلاث */
+            .print-logo { display: block; position: absolute; top: 20px; z-index: 2; max-height: 80px; width: auto; }
             .print-logo-left { left: 20px; right: auto; }
             .print-logo-right { right: 20px; left: auto; }
             .print-logo-center { left: 50%; transform: translateX(-50%); top: 20px; }
-            .container {
-                position: relative;
-                z-index: 1;
-                background: transparent;
-                padding: 100px 20px 20px 20px;
-                margin: 0;
-            }
-            .no-print, .nav-buttons, .admin-tools, .footer-buttons, .btn, .action-icons, .modal, .login-modal, .status-badge, .note, .footer-design {
-                display: none !important;
-            }
-            .card {
-                background: rgba(255, 255, 255, 0.95) !important;
-                backdrop-filter: none !important;
-                box-shadow: none;
-                border: 1px solid #aaa;
-                padding: 15px;
-                margin-bottom: 20px;
-            }
+            
+            .print-date { display: block; text-align: center; margin-top: 100px; margin-bottom: 20px; font-size: 14px; font-weight: bold; color: #1f3b2c; }
+            .container { position: relative; background: white; padding: 100px 20px 20px 20px; margin: 0; }
+            .no-print, .nav-buttons, .admin-tools, .footer-buttons, .btn, .action-icons, .modal, .login-modal, .status-badge, .note, .footer-design { display: none !important; }
+            .card { background: white !important; backdrop-filter: none !important; box-shadow: none; border: 1px solid #aaa; padding: 15px; margin-bottom: 20px; }
             h2, h3 { color: #1f3b2c !important; text-shadow: none !important; border-right-color: #2a5a3b; }
             .table-wrapper { background: transparent !important; backdrop-filter: none !important; }
             table { background: white !important; border: 1px solid #000; width: 100%; }
-            th { background: #e0e0e0 !important; color: black !important; border: 1px solid #aaa; }
-            td { border: 1px solid #aaa; color: black; background: white; }
+            /* تظليل خفيف للهيدر في الطباعة */
+            th { background: #c0cfb0 !important; color: #1f3b2c !important; border: 1px solid #000; }
+            td { border: 1px solid #000; color: black; background: white; }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- الصور الثلاث ستظهر فقط عند الطباعة -->
     <img src="logo2.png" class="print-logo print-logo-left" alt="شعار يسار">
     <img src="logo3.png" class="print-logo print-logo-right" alt="شعار يمين">
     <img src="logo.png" class="print-logo print-logo-center" alt="شعار وسط">
+    <div class="print-date" style="display: none;"></div>
 
     <div class="nav-buttons no-print">
         <button id="userViewBtn" class="btn btn-outline"><i class="fas fa-user-shield"></i> الصفحة الرئيسية (مستخدم)</button>
@@ -514,6 +517,9 @@
     </div>
 </div>
 
+<div id="exportContainer" class="export-area" style="position: fixed; top: -9999px; left: -9999px;"></div>
+
+<!-- نافذة تسجيل الدخول للمدير -->
 <div id="loginModal" class="login-modal">
     <div class="login-modal-content">
         <i class="fas fa-user-lock"></i>
@@ -525,6 +531,7 @@
     </div>
 </div>
 
+<!-- نافذة نجاح العملية -->
 <div id="successModal" class="modal">
     <div class="modal-content">
         <i class="fas fa-check-circle"></i>
@@ -534,7 +541,6 @@
 </div>
 
 <script>
-    // جميع المتغيرات والدوال الأساسية (نفس السابق)
     const STORAGE_ENTRIES = "military_donations";
     const STORAGE_SYSTEM = "system_closed_status";
     let entries = [];
@@ -655,25 +661,70 @@
         document.getElementById('month').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
     }
 
-    // دالة تصدير PDF باستخدام html2canvas لحل مشكلة العربية بشكل نهائي
-    function exportToPDF() {
+    // تصدير PDF بدون الصور، فقط الجدول مع التاريخ وتظليل خفيف للهيدر
+    async function exportToPDF() {
         if(!entries.length){ alert("لا توجد بيانات لتصديرها"); return; }
         
-        const element = document.getElementById('pdfExportArea');
-        // إخفاء عمود الإجراءات مؤقتاً لعدم ظهوره في PDF
-        const actionCells = document.querySelectorAll('#adminTable .action-icons');
-        actionCells.forEach(cell => cell.style.display = 'none');
+        const exportBtn = document.getElementById('exportPdfBtn');
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+        exportBtn.disabled = true;
         
-        html2canvas(element, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            logging: false,
-            useCORS: true
-        }).then(canvas => {
+        try {
+            const container = document.getElementById('exportContainer');
+            container.innerHTML = '';
+            
+            // إضافة التاريخ فقط (بدون صور)
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'report-date';
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+            dateDiv.innerHTML = `تاريخ الصدور: ${dateStr}`;
+            container.appendChild(dateDiv);
+            
+            // نسخ الجدول وإزالة عمود الإجراءات
+            const originalTable = document.getElementById('adminTable');
+            const clonedTable = originalTable.cloneNode(true);
+            const actionHeaders = clonedTable.querySelectorAll('th.no-print');
+            actionHeaders.forEach(th => th.remove());
+            const actionCells = clonedTable.querySelectorAll('td.action-icons');
+            actionCells.forEach(td => td.remove());
+            
+            // تطبيق نفس التنسيق مع تظليل خفيف للهيدر
+            clonedTable.style.width = '100%';
+            clonedTable.style.borderCollapse = 'collapse';
+            clonedTable.style.border = '1px solid #000';
+            const ths = clonedTable.querySelectorAll('th');
+            ths.forEach(th => {
+                th.style.backgroundColor = '#d0d8c8';
+                th.style.color = '#1f3b2c';
+                th.style.padding = '12px 8px';
+                th.style.border = '1px solid #000';
+                th.style.fontWeight = 'bold';
+            });
+            const tds = clonedTable.querySelectorAll('td');
+            tds.forEach(td => {
+                td.style.padding = '10px 8px';
+                td.style.border = '1px solid #000';
+                td.style.backgroundColor = 'white';
+                td.style.color = 'black';
+            });
+            
+            container.appendChild(clonedTable);
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const canvas = await html2canvas(container, {
+                scale: 2.5,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: false,
+                allowTaint: true
+            });
+            
             const imgData = canvas.toDataURL('image/png');
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            const imgWidth = 190; // عرض A4 بالملليمتر
+            const imgWidth = 190;
             const pageHeight = 277;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             let heightLeft = imgHeight;
@@ -689,13 +740,15 @@
                 heightLeft -= pageHeight;
             }
             doc.save('تقرير_الخصومات.pdf');
-            // إعادة إظهار عمود الإجراءات
-            actionCells.forEach(cell => cell.style.display = 'table-cell');
-        }).catch(error => {
+            
+        } catch (error) {
             console.error('خطأ في إنشاء PDF:', error);
-            alert('حدث خطأ أثناء تصدير PDF، يرجى المحاولة مرة أخرى أو استخدام زر الطباعة.');
-            actionCells.forEach(cell => cell.style.display = 'table-cell');
-        });
+            alert('حدث خطأ أثناء تصدير PDF. تأكد من وجود البيانات وحاول مرة أخرى.');
+        } finally {
+            document.getElementById('exportContainer').innerHTML = '';
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }
     }
 
     function printAdminTable() { window.print(); }
@@ -736,6 +789,11 @@
         const defaultMonth = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
         const monthInput = document.getElementById('month');
         if(monthInput && !monthInput.value) monthInput.value = defaultMonth;
+        const printDateSpan = document.querySelector('.print-date');
+        if(printDateSpan) {
+            printDateSpan.textContent = `تاريخ الصدور: ${new Date().toLocaleDateString('ar-EG')}`;
+            printDateSpan.style.display = 'block';
+        }
     }
 
     document.getElementById('userViewBtn').addEventListener('click', ()=>{ if(isAdminLoggedIn) logoutAdmin(); else { userSection.style.display="block"; adminSection.style.display="none"; updateSystemUI(); } });
