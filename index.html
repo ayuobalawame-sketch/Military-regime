@@ -6,12 +6,12 @@
     <title>نظام الخصم التطوعي - المبادرة العسكرية (مع إرفاق قسيمة)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* جميع الأنماط الأصلية - لم تتغير */
         * {
             margin: 0;
             padding: 0;
@@ -476,8 +476,9 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-receipt"></i> صورة قسيمة التحويل (اختياري)</label>
-                    <input type="file" id="receiptImage" accept="image/jpeg, image/png, image/jpg" capture="environment">
-                    <div class="note"><i class="fas fa-info-circle"></i> يمكنك التقاط صورة للقسيمة أو رفعها. سيتم ضغط الصورة تلقائياً.</div>
+                    <!-- <input type="file" id="receiptImage" accept="image/jpeg, image/png, image/jpg" capture="environment"> -->
+                    <input type="file" id="receiptImage" accept="image/jpeg, image/png, image/jpg">
+                    <div class="note"><i class="fas fa-info-circle"></i> يمكنك اختيار صورة من المعرض أو التقاطها بالكاميرا. سيتم ضغطها تلقائياً.</div>
                 </div>
                 <button type="submit" id="submitDonationBtn" class="btn btn-primary"><i class="fas fa-check-circle"></i> تقديم المساهمة</button>
             </form>
