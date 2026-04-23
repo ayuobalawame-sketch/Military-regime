@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>نظام الخصم التطوعي - المبادرة العسكرية</title>
+    <title>نظام الخصم التطوعي - المبادرة العسكرية (مع إرفاق قسيمة)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase SDKs (الإصدار المتوافق) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* جميع الأنماط كما هي (لم تتغير) */
         * {
             margin: 0;
             padding: 0;
@@ -209,6 +208,12 @@
             color: #b13e3e;
             font-size: 1.2rem;
         }
+        .preview-icon {
+            color: #2a6e3f;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin: 0 3px;
+        }
         .nav-buttons {
             display: flex;
             gap: 15px;
@@ -362,6 +367,26 @@
         .modal-content button:hover {
             background: #1f552d;
         }
+        .image-preview-modal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .image-preview-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 16px;
+            border: 3px solid #e6b422;
+            box-shadow: 0 0 30px black;
+        }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -427,7 +452,7 @@
                 <h2><i class="fas fa-hand-holding-heart"></i> المشاركة في الخصم التطوعي</h2>
                 <div class="status-badge" id="systemStatusBadgeUser">🟢 النظام مفتوح</div>
             </div>
-            <p style="margin-bottom: 20px; color: #fff3e0; text-shadow: 1px 1px 0 #000;">تبرع شهرياً بالمبلغ الذي تراه مناسباً، يتم خصمه شهرياً بإرادتك.</p>
+            <p style="margin-bottom: 20px; color: #fff3e0; text-shadow: 1px 1px 0 #000;">تبرع شهرياً بالمبلغ الذي تراه مناسباً، ويتم خصمه شهرياً بإرادتك. يمكنك إرفاق صورة قسيمة التحويل من المصرف.</p>
             <form id="donationForm">
                 <div class="form-group">
                     <label><i class="fas fa-user"></i> الاسم الكامل</label>
@@ -449,9 +474,14 @@
                     <label><i class="fas fa-calendar-alt"></i> الشهر</label>
                     <input type="month" id="month" required>
                 </div>
+                <div class="form-group">
+                    <label><i class="fas fa-receipt"></i> صورة قسيمة التحويل (اختياري)</label>
+                    <input type="file" id="receiptImage" accept="image/jpeg, image/png, image/jpg" capture="environment">
+                    <div class="note"><i class="fas fa-info-circle"></i> يمكنك التقاط صورة للقسيمة أو رفعها. سيتم ضغط الصورة تلقائياً.</div>
+                </div>
                 <button type="submit" id="submitDonationBtn" class="btn btn-primary"><i class="fas fa-check-circle"></i> تقديم المساهمة</button>
             </form>
-            <div class="note"><i class="fas fa-info-circle"></i> سيتم تسجيل بياناتك ويمكن للمدير مراجعتها.</div>
+            <div class="note"><i class="fas fa-info-circle"></i> سيتم تسجيل بياناتك والصورة (إن وجدت) ويمكن للمدير مراجعتها.</div>
         </div>
         <div id="systemClosedFullMessage" class="closed-full-message" style="display: none;">
             <i class="fas fa-ban"></i>
@@ -476,13 +506,16 @@
         <div class="table-wrapper" id="pdfExportArea">
             <table id="adminTable">
                 <thead>
-                    <tr><th>الاسم</th><th>رقم العسكري</th><th>الرتبة</th><th>قيمة الخصم</th><th>الشهر</th><th class="no-print">إجراء</th></tr>
+                    <tr>
+                        <th>الاسم</th><th>رقم العسكري</th><th>الرتبة</th><th>قيمة الخصم</th><th>الشهر</th><th>صورة القسيمة</th><th class="no-print">إجراء</th>
+                    </tr>
                 </thead>
-                <tbody id="adminTableBody"><tr><td colspan="6" style="text-align:center;">جار التحميل...<br>الرجاء الانتظار</td></tr>
+                <tbody id="adminTableBody">
+                    <tr><td colspan="7" style="text-align:center;">جار التحميل...<br>الرجاء الانتظار</td></tr>
                 </tbody>
             </table>
         </div>
-        <div class="footer-buttons no-print"><span class="note"><i class="fas fa-database"></i> يمكنك سحب الجدول (PDF) أو طباعته، وحذف أي سجل.</span></div>
+        <div class="footer-buttons no-print"><span class="note"><i class="fas fa-database"></i> يمكنك سحب الجدول (PDF) أو طباعته، وحذف أي سجل. اضغط على أيقونة الصورة لعرضها بحجم أكبر.</span></div>
     </div>
 
     <div class="footer-design no-print">
@@ -514,8 +547,13 @@
     </div>
 </div>
 
+<!-- نافذة عرض الصورة -->
+<div id="imagePreviewModal" class="image-preview-modal" onclick="closeImagePreview()">
+    <img id="previewImage" src="" alt="صورة القسيمة">
+</div>
+
 <script>
-    // ================== إعدادات Firebase (تم استلامها من المستخدم) ==================
+    // ================== إعدادات Firebase (مأخوذة من المشروع الأصلي) ==================
     const firebaseConfig = {
         apiKey: "AIzaSyAJzshJvGGsiFt4msYmgVz5GaueNb7IhzQ",
         authDomain: "military-donation-system.firebaseapp.com",
@@ -525,16 +563,14 @@
         messagingSenderId: "88886096567",
         appId: "1:88886096567:web:c9b1227d0cdbca13241332"
     };
-    // تهيئة Firebase (باستخدام طريقة compat)
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
     // ================== المتغيرات العامة ==================
     let isAdminLoggedIn = false;
-    let currentDonations = [];     // مصفوفة التبرعات الحالية (تستخدم لعرض الجدول والتصدير)
-    let unsubscribeDonations = null;   // للتوقف عن الاستماع للتغييرات
+    let currentDonations = [];
+    let unsubscribeDonations = null;
 
-    // عناصر DOM
     const userSection = document.getElementById('userSection');
     const adminSection = document.getElementById('adminSection');
     const adminTableBody = document.getElementById('adminTableBody');
@@ -549,15 +585,19 @@
     const loginPasswordInput = document.getElementById('loginPassword');
     const submitLoginBtn = document.getElementById('submitLoginBtn');
     const loginErrorMsg = document.getElementById('loginErrorMsg');
+    const receiptImageInput = document.getElementById('receiptImage');
+    const imagePreviewModal = document.getElementById('imagePreviewModal');
+    const previewImage = document.getElementById('previewImage');
 
     const ADMIN_USERNAME = "اسلام مصطفى ابعيو";
     const ADMIN_PASSWORD = "092123";
 
-    // ================== دوال مساعدة ==================
     function closeModal() { successModal.style.display = "none"; }
     function showSuccessModal() { successModal.style.display = "flex"; }
     function closeLoginModal() { loginModal.style.display = "none"; }
     function showLoginModal() { loginModal.style.display = "flex"; loginErrorMsg.innerText = ""; loginNameInput.value = ""; loginPasswordInput.value = ""; }
+    function closeImagePreview() { imagePreviewModal.style.display = "none"; previewImage.src = ""; }
+    function showImagePreview(src) { previewImage.src = src; imagePreviewModal.style.display = "flex"; }
 
     function formatMonth(monthValue) {
         if (!monthValue) return "";
@@ -571,46 +611,48 @@
         return str.replace(/[&<>]/g, m => m==='&'?'&amp;': m==='<'?'&lt;':'&gt;');
     }
 
-    // عرض جدول المدير من البيانات الحالية (currentDonations)
-    function renderAdminTable() {
-        if (!adminTableBody) return;
-        if (!currentDonations.length) {
-            adminTableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">📭 لا توجد مساهمات حتى الآن</td></tr>';
-            return;
-        }
-        // ترتيب تنازلي حسب التاريخ (الأحدث أولاً)
-        const sorted = [...currentDonations].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-        let html = '';
-        sorted.forEach(donation => {
-            html += `
-                <tr>
-                    <td>${escapeHtml(donation.name)}</td>
-                    <td>${escapeHtml(donation.militaryNumber)}</td>
-                    <td>${escapeHtml(donation.rank)}</td>
-                    <td>${Number(donation.amount).toLocaleString()}</td>
-                    <td>${formatMonth(donation.month)}</td>
-                    <td class="action-icons no-print"><i class="fas fa-trash-alt" onclick="deleteEntry('${donation.id}')" title="حذف"></i></td>
-                </tr>
-            `;
+    // ضغط وتحويل الصورة إلى Base64
+    function compressAndEncodeImage(file) {
+        return new Promise((resolve, reject) => {
+            if (!file || !file.type.match('image.*')) {
+                resolve(null);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+                    const maxSize = 1024; // الحد الأقصى للضلع الطويل
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.7);
+                    resolve(base64);
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
         });
-        adminTableBody.innerHTML = html;
     }
 
-    // حذف تبرع من Firebase
-    window.deleteEntry = async function(id) {
-        if (!confirm("حذف السجل نهائياً؟")) return;
-        try {
-            await database.ref(`donations/${id}`).remove();
-            // سيتم تحديث الجدول تلقائياً عبر المستمع (onValue)
-        } catch (error) {
-            console.error("خطأ في الحذف:", error);
-            alert("حدث خطأ أثناء الحذف، يرجى المحاولة مرة أخرى.");
-        }
-    };
-
-    // إضافة تبرع جديد إلى Firebase
-    async function addDonationToFirebase(name, militaryNumber, rank, amount, month) {
-        const newId = Date.now().toString();   // معرف فريد
+    // إضافة تبرع مع الصورة
+    async function addDonationToFirebase(name, militaryNumber, rank, amount, month, receiptImageBase64 = null) {
+        const newId = Date.now().toString();
         const donation = {
             id: newId,
             name: name.trim(),
@@ -618,7 +660,8 @@
             rank: rank.trim(),
             amount: Number(amount),
             month: month,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            receiptImage: receiptImageBase64
         };
         try {
             await database.ref(`donations/${newId}`).set(donation);
@@ -630,26 +673,64 @@
         }
     }
 
-    // قراءة جميع التبرعات من Firebase والاستماع للتغييرات في الوقت الفعلي
     function listenToDonations() {
-        if (unsubscribeDonations) unsubscribeDonations(); // إلغاء الاستماع السابق
+        if (unsubscribeDonations) unsubscribeDonations();
         const donationsRef = database.ref('donations');
         unsubscribeDonations = donationsRef.on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // تحويل الكائن إلى مصفوفة
                 currentDonations = Object.values(data);
             } else {
                 currentDonations = [];
             }
-            // تحديث الجدول إذا كان المدير يشاهده حالياً
             if (adminSection.style.display === 'block') {
                 renderAdminTable();
             }
         });
     }
 
-    // ================== دوال حالة النظام (مشتركة بين الجميع) ==================
+    // عرض جدول المدير مع عمود الصورة
+    function renderAdminTable() {
+        if (!adminTableBody) return;
+        if (!currentDonations.length) {
+            adminTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">📭 لا توجد مساهمات حتى الآن</td></tr>';
+            return;
+        }
+        const sorted = [...currentDonations].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+        let html = '';
+        sorted.forEach(donation => {
+            const hasImage = donation.receiptImage && donation.receiptImage.startsWith('data:image');
+            const imageCell = hasImage 
+                ? `<i class="fas fa-image preview-icon" onclick="event.stopPropagation(); showImagePreview('${donation.receiptImage}')" title="عرض صورة القسيمة"></i>`
+                : '<span style="color:#888;">لا توجد</span>';
+            html += `
+                <tr>
+                    <td>${escapeHtml(donation.name)}</td>
+                    <td>${escapeHtml(donation.militaryNumber)}</td>
+                    <td>${escapeHtml(donation.rank)}</td>
+                    <td>${Number(donation.amount).toLocaleString()}</td>
+                    <td>${formatMonth(donation.month)}</td>
+                    <td style="text-align:center;">${imageCell}</td>
+                    <td class="action-icons no-print"><i class="fas fa-trash-alt" onclick="deleteEntry('${donation.id}')" title="حذف"></i></td>
+                </tr>
+            `;
+        });
+        adminTableBody.innerHTML = html;
+    }
+
+    window.deleteEntry = async function(id) {
+        if (!confirm("حذف السجل نهائياً؟")) return;
+        try {
+            await database.ref(`donations/${id}`).remove();
+        } catch (error) {
+            console.error("خطأ في الحذف:", error);
+            alert("حدث خطأ أثناء الحذف، يرجى المحاولة مرة أخرى.");
+        }
+    };
+
+    window.showImagePreview = showImagePreview;
+
+    // ================== حالة النظام ==================
     async function getSystemClosed() {
         try {
             const snapshot = await database.ref('systemClosed').once('value');
@@ -687,7 +768,8 @@
         const submitBtn = document.getElementById('submitDonationBtn');
         if (submitBtn) submitBtn.disabled = isClosed;
         const inputs = donationForm.querySelectorAll('input');
-        inputs.forEach(inp => { if (inp.type !== 'button') inp.disabled = isClosed; });
+        inputs.forEach(inp => { if (inp.type !== 'button' && inp.type !== 'file') inp.disabled = isClosed; });
+        if (receiptImageInput) receiptImageInput.disabled = isClosed;
         if (submitBtn) submitBtn.disabled = isClosed;
     }
 
@@ -703,6 +785,8 @@
         const rank = document.getElementById('rank').value;
         const amount = document.getElementById('amount').value;
         const month = document.getElementById('month').value;
+        const imageFile = receiptImageInput.files[0];
+        
         if (!name || !milNumber || !rank || !amount || !month) {
             alert("جميع الحقول مطلوبة");
             return;
@@ -711,16 +795,29 @@
             alert("قيمة الخصم يجب أن تكون أكبر من صفر");
             return;
         }
-        const success = await addDonationToFirebase(name, milNumber, rank, amount, month);
+
+        let imageBase64 = null;
+        if (imageFile) {
+            try {
+                imageBase64 = await compressAndEncodeImage(imageFile);
+                if (!imageBase64) throw new Error("فشل ضغط الصورة");
+            } catch (err) {
+                alert("حدث خطأ في معالجة الصورة، تأكد من اختيار صورة صالحة.");
+                return;
+            }
+        }
+
+        const success = await addDonationToFirebase(name, milNumber, rank, amount, month, imageBase64);
         if (success) {
             showSuccessModal();
             donationForm.reset();
+            receiptImageInput.value = "";
             const today = new Date();
             document.getElementById('month').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
         }
     }
 
-    // ================== تصدير PDF (بدون صور، يعتمد على currentDonations) ==================
+    // ================== تصدير PDF ==================
     async function exportToPDF() {
         if (!currentDonations.length) {
             alert("لا توجد بيانات لتصديرها");
@@ -733,63 +830,50 @@
         try {
             const container = document.getElementById('exportContainer');
             container.innerHTML = '';
-            // إضافة التاريخ
             const dateDiv = document.createElement('div');
             dateDiv.className = 'report-date';
             const now = new Date();
             const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
             dateDiv.innerHTML = `تاريخ الصدور: ${dateStr}`;
             container.appendChild(dateDiv);
-            // بناء جدول HTML من currentDonations
             const table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
-            table.style.border = '1px solid #000';
-            // رأس الجدول
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            ['الاسم', 'رقم العسكري', 'الرتبة', 'قيمة الخصم', 'الشهر'].forEach(text => {
+            ['الاسم', 'رقم العسكري', 'الرتبة', 'قيمة الخصم', 'الشهر', 'صورة القسيمة'].forEach(text => {
                 const th = document.createElement('th');
                 th.textContent = text;
                 th.style.backgroundColor = '#d0d8c8';
-                th.style.color = '#1f3b2c';
                 th.style.padding = '12px 8px';
                 th.style.border = '1px solid #000';
-                th.style.fontWeight = 'bold';
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
             table.appendChild(thead);
-            // جسم الجدول
             const tbody = document.createElement('tbody');
             const sorted = [...currentDonations].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-            sorted.forEach(d => {
+            for (const d of sorted) {
                 const row = document.createElement('tr');
+                const hasImage = d.receiptImage && d.receiptImage.startsWith('data:image');
+                const imageText = hasImage ? '✅ مرفقة' : '❌ غير مرفقة';
                 const td1 = document.createElement('td'); td1.textContent = d.name;
                 const td2 = document.createElement('td'); td2.textContent = d.militaryNumber;
                 const td3 = document.createElement('td'); td3.textContent = d.rank;
                 const td4 = document.createElement('td'); td4.textContent = Number(d.amount).toLocaleString();
                 const td5 = document.createElement('td'); td5.textContent = formatMonth(d.month);
-                [td1, td2, td3, td4, td5].forEach(td => {
+                const td6 = document.createElement('td'); td6.textContent = imageText;
+                [td1, td2, td3, td4, td5, td6].forEach(td => {
                     td.style.padding = '10px 8px';
                     td.style.border = '1px solid #000';
                     td.style.backgroundColor = 'white';
-                    td.style.color = 'black';
                     td.style.textAlign = 'center';
                     row.appendChild(td);
                 });
                 tbody.appendChild(row);
-            });
+            }
             table.appendChild(tbody);
             container.appendChild(table);
             await new Promise(resolve => setTimeout(resolve, 300));
-            const canvas = await html2canvas(container, {
-                scale: 2.5,
-                backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: false,
-                allowTaint: true
-            });
+            const canvas = await html2canvas(container, { scale: 2.5, backgroundColor: '#ffffff', logging: false });
             const imgData = canvas.toDataURL('image/png');
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -817,7 +901,6 @@
         }
     }
 
-    // ================== دوال المدير ==================
     function printAdminTable() { window.print(); }
     
     async function clearAllData() {
@@ -853,7 +936,7 @@
     function showAdminDashboard() {
         userSection.style.display = "none";
         adminSection.style.display = "block";
-        renderAdminTable();     // عرض الجدول من currentDonations
+        renderAdminTable();
         updateSystemUI();
     }
     
@@ -864,7 +947,7 @@
         updateSystemUI();
     }
     
-    // ================== تهيئة أولية ==================
+    // ================== التهيئة ==================
     async function checkInitialView() {
         if (isAdminLoggedIn) showAdminDashboard();
         else {
@@ -881,7 +964,6 @@
             printDateSpan.textContent = `تاريخ الصدور: ${new Date().toLocaleDateString('ar-EG')}`;
             printDateSpan.style.display = 'block';
         }
-        // بدء الاستماع للتبرعات
         listenToDonations();
     }
     
@@ -908,9 +990,9 @@
     window.onclick = function(event) {
         if (event.target === loginModal) closeLoginModal();
         if (event.target === successModal) closeModal();
+        if (event.target === imagePreviewModal) closeImagePreview();
     };
     
-    // بدء التطبيق
     checkInitialView();
 </script>
 </body>
